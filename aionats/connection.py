@@ -70,11 +70,7 @@ class Connection:
 
     def __del__(self):
         if not self.closed:
-            # This will block the loop, please use close
-            # coroutine to close connection
-            self._conn.close()
-            self._conn = None
-
+            self.close()
             warnings.warn("Unclosed connection {!r}".format(self),
                           ResourceWarning)
 
@@ -90,3 +86,8 @@ class Connection:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.close()
         return
+
+    def close(self):
+        self._reader = None
+        self._writer.transport.close()
+        self._writer = None
